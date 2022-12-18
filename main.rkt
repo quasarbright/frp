@@ -5,6 +5,8 @@
 ; current weaknesses:
 ; doesn't handle conditionals well. need to explicitly indicate all dependencies and suffer duplicate evaluation or miss some updates.
 ; doesn't garbage collect well
+; sometimes re-evaluates when not necessary. When a leaf updates, if its value stays the same, it doesn't re-evaluate dependents. However, if an indirect update
+; doesn't change a value, its dependents are still re-evaluated.
 
 ; there must be a better way to handle automatic dependency collection for conditionals.
 ; A static variable reference analysis could do it, but how would you do that?
@@ -15,7 +17,12 @@
 ; You have to choose between re-evaluations and incorrect results.
 ; Unless you can somehow represent conditional dependencies directly.
 ; Or what if you only updated dependents if the value actually changed, using an eq? check? Not sure if that'd be compatible with topo sort either though.
+;
+; After reading FrTime paper:
 ; According to the FrTime paper, they use bfs with a priority queue where the maximum dependency height of a cell is the priority
+; They handle conditionals by changing the graph as it updates, which sounds like a mess. Not interested.
+; They seem to do their own gc.
+; They handle cycles with a delay operator. This may be simple enough to be worth trying out here.
 
 (module+ examples (provide (all-defined-out)))
 (module+ test (require rackunit) (require (submod ".." examples)))
